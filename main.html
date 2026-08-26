@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Offline LightCycler 480 instrument qualification reader with calculated QC, raw-data exports and machine-readable JSON-LD metadata.">
+<meta name="application-name" content="LightCycler 480 Instrument QC Verification">
+<meta name="software-version" content="2026.08.26">
+<title>LightCycler 480 — Instrument QC Verification</title>
+<!--
+  MACHINE-READABLE LANDING-PAGE METADATA
+  JavaScript adds one Dataset node per locally loaded qualification run. Local
+  paths and experiment values never leave this page. FAIR, TRUST and CARE are
+  cited as design principles; no certification or governance status is claimed.
+-->
+<script id="machine-metadata" type="application/ld+json">
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "pav": "http://purl.org/pav/",
+    "spdx": "http://spdx.org/rdf/terms#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+  },
+  "@graph": [
+    {
+      "@id": "#application",
+      "@type": ["SoftwareApplication", "WebApplication", "prov:SoftwareAgent"],
+      "name": "LightCycler 480 Instrument QC Verification",
+      "alternateName": "LightCycler 480 仪器质控验证",
+      "description": "Offline browser reader for completed Roche LightCycler 480 instrument-qualification .ixo runs, calculated QC, trend review and raw-data export.",
+      "applicationCategory": "ScientificApplication",
+      "applicationSubCategory": "qPCR instrument qualification and quality control",
+      "operatingSystem": "Any operating system with a modern browser",
+      "softwareVersion": "2026.08.26",
+      "dateModified": "2026-08-26",
+      "inLanguage": ["en", "zh"],
+      "isAccessibleForFree": true,
+      "mainEntity": {"@id": "#catalog"},
+      "subjectOf": {"@id": "#metadata-profile"},
+      "rdfs:comment": "Calculated QC is an independent review result and is not a Roche certificate. Run-specific Dataset nodes are created only after local files are read."
+    },
+    {
+      "@id": "#catalog",
+      "@type": ["DataCatalog", "dcat:Catalog"],
+      "name": "LightCycler 480 instrument-QC run catalog",
+      "description": "A local, transient catalog of instrument-qualification runs selected in this browser session.",
+      "isPartOf": {"@id": "#application"},
+      "subjectOf": {"@id": "#metadata-profile"},
+      "rdfs:comment": "The catalog is never uploaded and is empty until one or more completed QC .ixo runs are loaded."
+    },
+    {
+      "@id": "#metadata-profile",
+      "@type": "DigitalDocument",
+      "name": "LightCycler 480 instrument-QC local metadata profile",
+      "description": "A descriptive JSON-LD profile using Schema.org Dataset, DataCatalog and DataDownload with DCAT, PROV-O, PAV and SPDX terms.",
+      "citation": [
+        {"@id": "https://doi.org/10.1038/sdata.2016.18"},
+        {"@id": "https://doi.org/10.1038/s41597-020-0486-7"},
+        {"@id": "https://doi.org/10.5334/dsj-2020-043"},
+        {"@id": "https://schema.org/docs/data-and-datasets.html"}
+      ],
+      "rdfs:comment": "The profile is FAIR-aligned but does not claim FAIR certification, repository TRUSTworthiness or CARE compliance. Licence, consent, access authority and Indigenous governance are not inferred."
+    },
+    {"@id":"https://doi.org/10.1038/sdata.2016.18","@type":"ScholarlyArticle","name":"The FAIR Guiding Principles for scientific data management and stewardship"},
+    {"@id":"https://doi.org/10.1038/s41597-020-0486-7","@type":"ScholarlyArticle","name":"The TRUST Principles for digital repositories"},
+    {"@id":"https://doi.org/10.5334/dsj-2020-043","@type":"ScholarlyArticle","name":"The CARE Principles for Indigenous Data Governance"}
+  ]
+}
+</script>
+<style>
+:root{--bg:#0f1420;--panel:#161d2b;--panel2:#1d2637;--ink:#e8edf6;--mut:#93a1b8;--line:#2a3550;--acc:#4ea1ff;--ok:#37c281;--bad:#ff5d6c;--warn:#ffc857;}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:16px 20px;background:linear-gradient(180deg,#182338,#111827);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;font-weight:650}
+header .sub{color:var(--mut);font-size:12px}
+.spacer{flex:1}
+.langbtn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+.langbtn:hover{border-color:var(--acc)}
+main{max-width:1180px;margin:0 auto;padding:18px 20px 80px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.card h2{font-size:15px;margin:0 0 10px;font-weight:640}
+.card h2 .n{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;background:var(--acc);color:#04203f;border-radius:6px;font-size:12px;margin-right:8px;font-weight:800}
+.mut{color:var(--mut)}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--mut);cursor:pointer;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--acc);background:#12203a;color:var(--ink)}
+button.act{background:var(--acc);border:0;color:#04203f;font-weight:700;padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13px}
+button.act:hover{filter:brightness(1.08)}
+button.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px}
+button.ghost:hover{border-color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
+.pill.ok{background:rgba(55,194,129,.16);color:var(--ok)}
+.pill.bad{background:rgba(255,93,108,.16);color:var(--bad)}
+.pill.na{background:rgba(147,161,184,.16);color:var(--mut)}
+input.lim{width:70px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:4px 6px;font-size:12px;text-align:right}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+canvas{max-width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+.plate{display:grid;grid-template-columns:auto repeat(12,1fr);gap:3px}
+.plate .cell{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#04203f;font-weight:700;background:var(--panel2);border:1px solid var(--line)}
+.plate .hdr{background:transparent;color:var(--mut);border:0;font-weight:600}
+.dlbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.tag{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--mut);margin:2px 4px 2px 0}
+select.sel,input.txt{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:6px 8px;font-size:13px}
+.runrow{cursor:pointer}
+.runrow:hover td{background:#18233a}
+.hidden{display:none}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-top:6px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
+.foot{color:var(--mut);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+details summary{cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 data-i18n="title">LightCycler 480 — Instrument QC Verification</h1>
+    <div class="sub" data-i18n="subtitle">Offline reader for Roche instrument-qualification .ixo files · crossing-point &amp; melting-Tm QC · trend charts · plate view · raw-data export</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="langbtn" id="langToggle">中文</button>
+</header>
+<main>
+
+<div class="card">
+  <h2><span class="n">1</span><span data-i18n="s1">Load QC verification files</span></h2>
+  <div class="mut" data-i18n="s1desc" style="margin-bottom:10px">Add one or more Roche instrument-QC <code>.ixo</code> files (e.g. the LightCycler PCR QC Kit run). Everything runs locally in your browser — nothing is uploaded. Load several runs to build trend / control charts across dates and instruments.</div>
+  <div class="drop" id="drop">
+    <div style="font-size:15px" data-i18n="dropTitle">Drop .ixo files here, or click to choose</div>
+    <div class="mut" style="margin-top:5px" data-i18n="dropSub">Multiple files supported · processed entirely on this computer</div>
+  </div>
+  <input type="file" id="file" multiple accept=".ixo" class="hidden">
+  <div class="dlbar" style="margin-top:12px">
+    <button class="ghost" id="clearBtn" data-i18n="clear">Clear all</button>
+    <span class="mut" id="loadState" style="align-self:center"></span>
+  </div>
+</div>
+
+<div class="card hidden" id="runsCard">
+  <h2><span class="n">2</span><span data-i18n="s2">Loaded runs &amp; calculated QC</span></h2>
+  <div style="overflow-x:auto">
+  <table id="runsTable">
+    <thead><tr>
+      <th data-i18n="c_file">File</th><th data-i18n="c_instr">Instrument</th><th data-i18n="c_date">Run date</th>
+      <th class="num" data-i18n="c_n">Wells</th><th class="num" data-i18n="c_cqm">Cq mean</th><th class="num" data-i18n="c_cqs">Cq SD</th>
+      <th data-i18n="c_profile">Profile</th><th class="num" data-i18n="c_tmp">Tm PCR mean</th><th class="num" data-i18n="c_tmm">TmA1 median</th>
+      <th data-i18n="c_verdict">QC</th><th data-i18n="c_sha">SHA-256</th>
+    </tr></thead>
+    <tbody id="runsBody"></tbody>
+  </table>
+  </div>
+  <div class="mut" style="font-size:12px;margin-top:8px" data-i18n="runsHint">Click a row to inspect its plate and curves. Cq uses the instrument's stored values. Tm values are independently recovered from the explicit program/channel acquisitions; the calculated verdict is not a Roche certificate.</div>
+</div>
+
+<div class="card hidden" id="limitsCard">
+  <h2><span class="n">3</span><span data-i18n="s3">Certificate acceptance profile</span></h2>
+  <div class="mut" style="margin-bottom:10px" data-i18n="s3desc">Auto applies the certificate generation matching each run date. Choose a fixed profile only when validating a run against a specific certificate lot.</div>
+  <label class="mut" data-i18n="profileLabel">Profile:</label>
+  <select class="sel" id="profileMode">
+    <option value="auto" data-i18n="profileAuto">Auto per run</option>
+    <option value="2017">2017 · lot 26324420</option>
+    <option value="2023">2023 · lot 57252820</option>
+    <option value="2025">2025/2026 · lot 78724220</option>
+  </select>
+  <div class="mut" id="profileSummary" style="font-size:12px;margin-top:10px"></div>
+  <div style="overflow-x:auto;margin-top:10px"><table>
+    <thead><tr><th data-i18n="l_metric">Metric</th><th data-i18n="c_observed">Observed</th><th data-i18n="c_acceptance">Acceptance</th><th data-i18n="c_verdict">Calculated QC</th></tr></thead>
+    <tbody id="checksBody"></tbody>
+  </table></div>
+</div>
+
+<div class="card hidden" id="trendCard">
+  <h2><span class="n">4</span><span data-i18n="s4">Trend / control charts</span></h2>
+  <div class="mut" style="margin-bottom:8px" data-i18n="s4desc">Longitudinal control charts, one panel per instrument, ordered by date. Shaded band = acceptance range.</div>
+  <div id="trendContainer"></div>
+  <div class="legend" id="trendLegend"></div>
+</div>
+
+<div class="card hidden" id="plateCard">
+  <h2><span class="n">5</span><span data-i18n="s5">Plate view</span> — <span id="plateTitle" class="mut"></span></h2>
+  <div style="margin-bottom:10px">
+    <label class="mut" style="font-size:12px" data-i18n="plateMetric">Colour by:</label>
+    <select class="sel" id="plateMetric">
+      <option value="cq" data-i18n="pm_cq">Crossing point (Cq)</option>
+      <option value="bg510" data-i18n="pm_bg">Fluorescence 510 background (cyc 2–6)</option>
+      <option value="dyn640" data-i18n="pm_dyn">Fluorescence 640 signal dynamics</option>
+      <option value="tmp" data-i18n="pm_tmp">Tm PCR mix (640)</option>
+      <option value="tmA1" data-i18n="pm_tma1">Tm melting mix (510) — TmA1 (Melting A)</option>
+      <option value="tmB1" data-i18n="pm_tmb1">Tm melting mix (510) — TmB1 (Melting B)</option>
+      <option value="dtm1" data-i18n="pm_dtm1">TmB1 − TmA1</option>
+      <option value="tmA2" data-i18n="pm_tma2">Tm melting mix (510) — TmA2 (Melting A)</option>
+      <option value="tmB2" data-i18n="pm_tmb2">Tm melting mix (510) — TmB2 (Melting B)</option>
+      <option value="dtm2" data-i18n="pm_dtm2">TmB2 − TmA2</option>
+    </select>
+  </div>
+  <div class="plate" id="plate"></div>
+  <div class="legend" id="plateLegend"></div>
+</div>
+
+<div class="card hidden" id="curveCard">
+  <h2><span class="n">6</span><span data-i18n="s6">Amplification &amp; melting curves</span> — <span id="curveTitle" class="mut"></span></h2>
+  <div style="margin-bottom:8px">
+    <label class="mut" style="font-size:12px" data-i18n="wellSel">Well:</label>
+    <select class="sel" id="wellSel"></select>
+    <span class="mut" id="wellInfo" style="margin-left:10px"></span>
+  </div>
+  <div class="grid2">
+    <div><div class="mut" style="font-size:12px;margin-bottom:4px" data-i18n="ampTitle">Amplification (fluorescence vs cycle)</div><canvas id="ampCanvas" width="560" height="260"></canvas></div>
+    <div><div class="mut" style="font-size:12px;margin-bottom:4px" data-i18n="meltTitle">Melting (−dF/dT vs temperature)</div><canvas id="meltCanvas" width="560" height="260"></canvas></div>
+  </div>
+</div>
+
+<div class="card hidden" id="dlCard">
+  <h2><span class="n">7</span><span data-i18n="s7">Download raw data</span></h2>
+  <div class="mut" style="margin-bottom:10px" data-i18n="s7desc">Export decoded raw values for independent graph reconstruction, control-chart comparison and archiving. Each export is plain CSV; a SHA-256 manifest records file integrity.</div>
+  <div class="dlbar">
+    <button class="ghost" id="dlAmp" data-i18n="dl_amp">Amplification curves (per well · per cycle)</button>
+    <button class="ghost" id="dlMelt" data-i18n="dl_melt">Melting curves (per well · per temperature)</button>
+    <button class="ghost" id="dlMetrics" data-i18n="dl_metrics">Per-well metrics (Cq · Tm)</button>
+    <button class="ghost" id="dlSummary" data-i18n="dl_summary">QC summary (all runs)</button>
+    <button class="ghost" id="dlManifest" data-i18n="dl_manifest">SHA-256 manifest</button>
+  </div>
+</div>
+
+<div class="card" id="metadataCard">
+  <h2><span class="n">8</span><span data-i18n="s8">Machine-readable metadata</span></h2>
+  <button class="ghost" id="dlMetadata" data-i18n="dl_metadata">Dataset metadata (JSON-LD)</button>
+</div>
+
+<div class="foot">
+  <span data-i18n="foot">Self-contained and offline. Cq is read from the stored analysis; Tm is independently calculated from the raw melting acquisitions. Fluorescence is shown in raw instrument units and is not included in the calculated verdict. Only Roche's Check Report Tool produces the official certificate.</span>
+</div>
+
+</main>
+<script>
+"use strict";
+/* ---------------- i18n ---------------- */
+const I18N={
+ en:{title:"LightCycler 480 — Instrument QC Verification",
+  subtitle:"Offline reader for Roche instrument-qualification .ixo files · crossing-point & melting-Tm QC · trend charts · plate view · raw-data export",
+  s1:"Load QC verification files",
+  s1desc:"Add one or more Roche instrument-QC .ixo files (e.g. the LightCycler PCR QC Kit run). Everything runs locally in your browser — nothing is uploaded. Load several runs to build trend / control charts across dates and instruments.",
+  dropTitle:"Drop .ixo files here, or click to choose",dropSub:"Multiple files supported · processed entirely on this computer",
+  clear:"Clear all",
+  s2:"Loaded runs & calculated QC",
+  c_file:"File",c_instr:"Instrument",c_date:"Run date",c_n:"Wells",c_cqm:"Cq mean",c_cqs:"Cq SD",c_profile:"Profile",c_tmp:"Tm PCR mean",c_tmm:"TmA1 median",c_verdict:"Calculated QC",c_sha:"SHA-256",
+  runsHint:"Click a row to inspect its plate and curves. Cq uses the instrument's stored values. Tm values are independently recovered from the explicit program/channel acquisitions; the calculated verdict is not a Roche certificate.",
+  s3:"Certificate acceptance profile",
+  s3desc:"Auto applies the certificate generation matching each run date. Choose a fixed profile only when validating a run against a specific certificate lot.",profileLabel:"Profile:",profileAuto:"Auto per run",
+  l_metric:"Metric",l_lo:"Lower",l_hi:"Upper",l_disp:"Dispersion limit",l_win:"Window (°C)",c_observed:"Observed",c_acceptance:"Acceptance",
+  l_cq:"Crossing point (Cq)",l_tmp:"Tm — PCR mix",l_tmm:"Tm — melting mix",l_range:"range ≤ ",apply:"Apply limits",
+  s4:"Trend / control charts",
+  s4desc:"Longitudinal control charts, one panel per instrument, ordered by date. Shaded band = acceptance range.",
+  ch_cq:"Crossing-point mean (Cq)",ch_sd:"Crossing-point SD (uniformity)",ch_tmm:"Melting-mix Tm",ch_tmp:"PCR-mix Tm",
+  p_cq:"Crossing point Cq — block mean ± SD (uniformity)",p_tm:"Amplicon Tm — temperature accuracy",noruns:"No dated runs to plot.",
+  s5:"Plate view",plateMetric:"Colour by:",pm_cq:"Crossing point (Cq)",pm_tmm:"Tm melting mix",pm_tmp:"Tm PCR mix (640)",
+  pm_bg:"Fluorescence 510 background (cyc 2–6, raw)",pm_dyn:"Fluorescence 640 signal dynamics (raw)",
+  pm_tma1:"Tm melting mix (510) — TmA1 (Melting A)",pm_tmb1:"Tm melting mix (510) — TmB1 (Melting B)",pm_dtm1:"TmB1 − TmA1",
+  pm_tma2:"Tm melting mix (510) — TmA2 (Melting A)",pm_tmb2:"Tm melting mix (510) — TmB2 (Melting B)",pm_dtm2:"TmB2 − TmA2",
+  s6:"Amplification & melting curves",wellSel:"Well:",ampTitle:"Amplification (fluorescence vs cycle)",meltTitle:"Melting (−dF/dT vs temperature)",
+  s7:"Download raw data",
+  s7desc:"Export decoded raw values for independent graph reconstruction, control-chart comparison and archiving. Each export is plain CSV; a SHA-256 manifest records file integrity.",
+  dl_amp:"Amplification curves (per well · per cycle)",dl_melt:"Melting curves (per well · per temperature)",dl_metrics:"Per-well metrics (Cq · Tm)",dl_summary:"QC summary (all runs)",dl_manifest:"SHA-256 manifest",
+  s8:"Machine-readable metadata",
+  dl_metadata:"Dataset metadata (JSON-LD)",
+  foot:"Self-contained and offline. Cq is read from the stored analysis; Tm is independently calculated from the raw melting acquisitions. Fluorescence is shown in raw instrument units and is not included in the calculated verdict. Only Roche's Check Report Tool produces the official certificate.",
+  pass:"CALC PASS",fail:"CALC FAIL",review:"REVIEW",acceptRange:"acceptance range",excludedLabel:"Excluded samples",na:"n/a",reading:"Reading",done:"loaded",well:"Well",pos:"Pos",cyc:"cycle",temp:"temperature",invalidRun:"Not a completed LightCycler 480 QC acquisition",duplicate:"duplicate skipped",decompressUnsupported:"This browser cannot decompress IXO acquisition data",rolePcr:"PCR mix",roleMelt:"melting mix",roleBlank:"blank"},
+ zh:{title:"LightCycler 480 — 仪器质控验证",
+  subtitle:"离线读取罗氏仪器验证 .ixo 文件 · 交叉点与熔解 Tm 质控 · 趋势图 · 板视图 · 原始数据导出",
+  s1:"加载质控验证文件",
+  s1desc:"添加一个或多个罗氏仪器质控 .ixo 文件（例如 LightCycler PCR QC 试剂盒运行）。全部在本地浏览器中处理——不上传任何数据。加载多个运行可跨日期和仪器构建趋势/控制图。",
+  dropTitle:"将 .ixo 文件拖到此处，或点击选择",dropSub:"支持多文件 · 完全在本机处理",
+  clear:"全部清除",
+  s2:"已加载运行与计算质控",
+  c_file:"文件",c_instr:"仪器",c_date:"运行日期",c_n:"孔数",c_cqm:"Cq 均值",c_cqs:"Cq 标准差",c_profile:"配置",c_tmp:"Tm PCR 均值",c_tmm:"TmA1 中位数",c_verdict:"计算质控",c_sha:"SHA-256",
+  runsHint:"点击某行可检查板图和曲线。Cq 使用仪器存储值；Tm 按明确的程序/通道采集独立计算。计算质控并非罗氏证书。",
+  s3:"证书验收配置",
+  s3desc:"自动模式按运行日期应用相应证书版本。仅在按特定证书批次验证时选择固定配置。",profileLabel:"配置：",profileAuto:"每次运行自动选择",
+  l_metric:"指标",l_lo:"下限",l_hi:"上限",l_disp:"离散限值",l_win:"窗口 (°C)",c_observed:"观测值",c_acceptance:"验收标准",
+  l_cq:"交叉点 (Cq)",l_tmp:"Tm — PCR 混合",l_tmm:"Tm — 熔解混合",l_range:"极差 ≤ ",apply:"应用限值",
+  s4:"趋势 / 控制图",
+  s4desc:"纵向控制图，每台仪器一个面板，按日期排序。阴影带 = 验收范围。",
+  ch_cq:"交叉点均值 (Cq)",ch_sd:"交叉点标准差（均一性）",ch_tmm:"熔解混合 Tm",ch_tmp:"PCR 混合 Tm",
+  p_cq:"交叉点 Cq — 板均值 ± 标准差（均一性）",p_tm:"扩增子 Tm — 温度准确度",noruns:"无带日期的运行可绘制。",
+  s5:"板视图",plateMetric:"着色依据：",pm_cq:"交叉点 (Cq)",pm_tmm:"Tm 熔解混合",pm_tmp:"Tm PCR 混合 (640)",
+  pm_bg:"荧光 510 背景（循环 2–6，原始）",pm_dyn:"荧光 640 信号动态范围（原始）",
+  pm_tma1:"Tm 熔解混合 (510) — TmA1（熔解 A）",pm_tmb1:"Tm 熔解混合 (510) — TmB1（熔解 B）",pm_dtm1:"TmB1 − TmA1",
+  pm_tma2:"Tm 熔解混合 (510) — TmA2（熔解 A）",pm_tmb2:"Tm 熔解混合 (510) — TmB2（熔解 B）",pm_dtm2:"TmB2 − TmA2",
+  s6:"扩增与熔解曲线",wellSel:"孔：",ampTitle:"扩增（荧光 vs 循环）",meltTitle:"熔解（−dF/dT vs 温度）",
+  s7:"下载原始数据",
+  s7desc:"导出解码后的原始值，用于独立绘图重建、控制图比较与归档。每次导出为纯 CSV；SHA-256 清单记录文件完整性。",
+  dl_amp:"扩增曲线（每孔·每循环）",dl_melt:"熔解曲线（每孔·每温度）",dl_metrics:"每孔指标（Cq·Tm）",dl_summary:"质控汇总（所有运行）",dl_manifest:"SHA-256 清单",
+  s8:"机器可读元数据",
+  dl_metadata:"数据集元数据（JSON-LD）",
+  foot:"独立、离线。Cq 读取自存储分析；Tm 由原始熔解采集独立计算。荧光仅显示原始仪器单位，不计入计算判定。官方证书只能由罗氏 Check Report Tool 生成。",
+  pass:"计算合格",fail:"计算不合格",review:"需复核",acceptRange:"验收范围",excludedLabel:"排除样本",na:"无",reading:"读取中",done:"已加载",well:"孔",pos:"位置",cyc:"循环",temp:"温度",invalidRun:"不是已完成的 LightCycler 480 质控采集",duplicate:"已跳过重复文件",decompressUnsupported:"此浏览器无法解压 IXO 采集数据",rolePcr:"PCR 混合",roleMelt:"熔解混合",roleBlank:"空白"}
+};
+const BASE_MACHINE_METADATA=JSON.parse(document.getElementById("machine-metadata").textContent);
+const METADATA_STANDARDS=[
+  {"@id":"https://www.w3.org/TR/json-ld11/","@type":"dcterms:Standard",name:"JSON-LD 1.1"},
+  {"@id":"https://schema.org/Dataset","@type":"dcterms:Standard",name:"Schema.org Dataset"},
+  {"@id":"https://www.w3.org/TR/vocab-dcat-3/","@type":"dcterms:Standard",name:"W3C Data Catalog Vocabulary (DCAT 3)"},
+  {"@id":"https://www.w3.org/TR/prov-o/","@type":"dcterms:Standard",name:"W3C PROV-O"},
+  {"@id":"http://purl.org/pav/","@type":"dcterms:Standard",name:"Provenance, Authoring and Versioning (PAV)"}
+];
+function cloneJSON(x){return JSON.parse(JSON.stringify(x));}
+function metadataDistribution(id,key,name,description,encodingFormat){return{
+  "@id":`${id}/distribution/${key}`,"@type":["DataDownload","dcat:Distribution"],name,description,encodingFormat,
+  "rdfs:comment":"Generated locally on demand. No public contentUrl is asserted because the run and export remain on the user's device."
+};}
+function metadataForRun(r,index){
+  const id=`#dataset-${r.sha||index+1}`,sourceId=`${id}/source`,profile=r._profile?r._profile.label:"unmatched — review required";
+  const distributions=[
+    {"@id":sourceId,"@type":["DataDownload","dcat:Distribution","prov:Entity"],name:r.name,
+      description:"Unmodified Roche LightCycler 480 instrument-qualification container used as the provenance anchor.",
+      encodingFormat:"application/octet-stream",
+      "spdx:checksum":{"@type":"spdx:Checksum","spdx:algorithm":{"@id":"spdx:checksumAlgorithm_sha256"},"spdx:checksumValue":r.sha},
+      additionalProperty:{"@type":"PropertyValue",name:"Source container format",value:".ixo (Roche LightCycler 480 experiment)"},
+      "rdfs:comment":"Only the source filename is recorded; no local filesystem path is published."},
+    metadataDistribution(id,"amplification","Amplification curves","Raw fluorescence per channel, well and cycle in the session CSV export.","text/csv"),
+    metadataDistribution(id,"melting","Melting curves","Raw fluorescence and independently calculated negative derivative per program, channel, well and temperature.","text/csv"),
+    metadataDistribution(id,"metrics","Per-well QC metrics","Stored Cq plus independently calculated PCR-mix and melting-mix Tm metrics.","text/csv"),
+    metadataDistribution(id,"summary","Calculated QC summary","Run-level statistics, acceptance profile, exclusions and calculated verdict.","text/csv"),
+    metadataDistribution(id,"manifest","Integrity manifest","SHA-256 checksums for source .ixo files and every generated session export.","text/csv"),
+    metadataDistribution(id,"metadata","Dataset metadata","This JSON-LD catalog, dataset, provenance, checksum and distribution description.","application/ld+json")
+  ];
+  const props=[
+    ["Instrument name",r.md.instrName],["Instrument identifier",r.serial],["Instrument software",r.md.sw],
+    ["QC kit lot",r.md.lot],["Acceptance profile",profile],["PCR wells",r._cq?r._cq.n:0],
+    ["Melting-mix wells",MELT_WELLS.length],["Calculated QC",r._overall==null?"REVIEW":(r._overall?"CALC PASS":"CALC FAIL")]
+  ].filter(([,v])=>v!==""&&v!=null).map(([name,value])=>({"@type":"PropertyValue",name,value}));
+  const dataset={
+    "@id":id,"@type":["Dataset","dcat:Dataset"],name:r.name,
+    description:"Decoded LightCycler 480 instrument-qualification run with stored crossing points, raw amplification and melting acquisitions, independently calculated Tm metrics and an explicitly labelled calculated QC result.",
+    identifier:[`urn:sha256:${r.sha}`,r.serial?`LightCycler instrument: ${r.serial}`:null].filter(Boolean),
+    includedInDataCatalog:{"@id":"#catalog"},measurementTechnique:"quantitative real-time PCR (qPCR) instrument qualification",
+    keywords:["qPCR","LightCycler 480","instrument qualification","quality control","Cq","melting temperature"],
+    variableMeasured:[
+      {"@type":"PropertyValue",name:"Stored crossing point",propertyID:"Cq",unitText:"PCR cycle"},
+      {"@type":"PropertyValue",name:"Raw fluorescence",propertyID:"fluorescence",unitText:"instrument raw unit"},
+      {"@type":"PropertyValue",name:"PCR-mix melting temperature",propertyID:"Tm PCR",unitCode:"CEL"},
+      {"@type":"PropertyValue",name:"Melting-mix peak temperatures",propertyID:"TmA1; TmB1; dTm1; TmA2; TmB2; dTm2",unitCode:"CEL"}
+    ],
+    additionalProperty:props,distribution:distributions,"dcat:distribution":distributions.map(x=>({"@id":x["@id"]})),
+    conformsTo:METADATA_STANDARDS,"dcterms:conformsTo":METADATA_STANDARDS.map(x=>({"@id":x["@id"]})),
+    subjectOf:{"@id":"#metadata-profile"},
+    conditionsOfAccess:"Processed locally from a user-selected file. Any downstream access conditions are determined by the responsible data steward.",
+    "dcterms:rights":"No licence, consent, community authority or permission for future reuse is inferred by this software.",
+    "prov:wasDerivedFrom":{"@id":sourceId},
+    "prov:wasGeneratedBy":{"@type":"prov:Activity",name:"Read-only LightCycler 480 QC decoding and independent metric calculation","prov:used":{"@id":sourceId},"prov:wasAssociatedWith":{"@id":"#application"}},
+    "pav:createdWith":{"@id":"#application"},
+    "dcterms:provenance":"Cq is preserved from the stored analysis. Tm and CALC PASS/FAIL are independently calculated and are not a Roche certificate.",
+    "rdfs:comment":"This Dataset record exposes no local path. Raw fluorescence is not included in the calculated verdict because Roche normalization is proprietary."
+  };
+  if(r.date){dataset.dateCreated=fdate(r.date);dataset.temporalCoverage=fdate(r.date);}
+  return dataset;
+}
+function machineMetadataDocument(){
+  const doc=cloneJSON(BASE_MACHINE_METADATA),graph=doc["@graph"],catalog=graph.find(x=>x["@id"]==="#catalog"),datasets=RUNS.map(metadataForRun);
+  catalog.dataset=datasets.map(x=>({"@id":x["@id"]}));catalog["dcat:dataset"]=catalog.dataset;
+  catalog.numberOfItems=datasets.length;catalog.dateModified="2026-08-26";graph.push(...datasets);return doc;
+}
+function machineMetadataJSON(){return JSON.stringify(machineMetadataDocument(),null,2)+"\n";}
+function renderMetadata(){
+  document.getElementById("machine-metadata").textContent=machineMetadataJSON();
+}
+function escHTML(value){return String(value==null?"":value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);}
+let LANG=(document.documentElement.getAttribute("data-lang")||"en");
+function t(k){return (I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k;}
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.title=t("title");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t(el.getAttribute("data-i18n"));});
+  document.getElementById("langToggle").textContent = LANG==="en"?"中文":"English";
+  render();
+}
+document.getElementById("langToggle").onclick=()=>{LANG=LANG==="en"?"zh":"en";applyLang();};
+
+/* ---------------- decoders ---------------- */
+function b64ToBytes(s){s=s.replace(/[^A-Za-z0-9+/=]/g,"");const bin=atob(s);const b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return b;}
+async function inflate(bytes){
+  if(typeof DecompressionStream==="undefined")throw new Error(t("decompressUnsupported"));
+  try{
+    const ds=new DecompressionStream("deflate");const w=ds.writable.getWriter();w.write(bytes);w.close();
+    const ab=await new Response(ds.readable).arrayBuffer();return new Uint8Array(ab);
+  }catch(e){
+    const ds=new DecompressionStream("deflate-raw");const w=ds.writable.getWriter();w.write(bytes.slice(2));w.close();
+    const ab=await new Response(ds.readable).arrayBuffer();return new Uint8Array(ab);
+  }
+}
+async function sha256hex(buf){
+  if(window.crypto&&crypto.subtle){try{const h=await crypto.subtle.digest("SHA-256",buf);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");}catch(e){}}
+  return jsSha256(new Uint8Array(buf));
+}
+function findTag(bytes,tag,from){outer:for(let p=from;p<=bytes.length-tag.length;p++){for(let k=0;k<tag.length;k++){if(bytes[p+k]!==tag[k])continue outer;}return p;}return -1;}
+const DARZ=[68,65,82,90],EARR=[69,65,82,82],FORM=[70,79,82,77];
+function darzArrays(bytes){
+  const out=[];let i=0;const dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+  while(true){i=findTag(bytes,DARZ,i);if(i<0)break;const start=i+12;let nxt=bytes.length;
+    for(const tg of [DARZ,EARR,FORM]){const j=findTag(bytes,tg,start);if(j>=0&&j<nxt)nxt=j;}
+    const n=Math.floor((nxt-start)/8);const a=new Float64Array(n);
+    for(let k=0;k<n;k++)a[k]=dv.getFloat64(start+k*8,true);out.push(a);i=start;}
+  return out;
+}
+const PCR_WELLS=Array.from({length:8},(_,row)=>[1,3,6,8,10].map(col=>row*12+col)).flat();
+const MELT_WELLS=[0,5,11,41,53,84,89,95];
+const PCR_SET=new Set(PCR_WELLS),MELT_SET=new Set(MELT_WELLS);
+const LIMIT_PROFILES={
+  "2017":{key:"2017",label:"2017 · lot 26324420",cq:{lo:21,hi:23,disp:.5},tmp:{lo:61.5,hi:63.9,disp:.3},tmA1:{lo:77.1,hi:79.5,disp:.9},tmB1:{lo:76.6,hi:79,disp:.9},dTm1:{lo:-.35,hi:.25,disp:.5},tmA2:{lo:90.1,hi:92.5,disp:1.1},tmB2:{lo:89.9,hi:92.3,disp:1.1},dTm2:{lo:-.45,hi:.15,disp:.5}},
+  "2023":{key:"2023",label:"2023 · lot 57252820",cq:{lo:20.9,hi:22.9,disp:.5},tmp:{lo:61.1,hi:63.5,disp:.3},tmA1:{lo:76.9,hi:79.3,disp:.9},tmB1:{lo:76.9,hi:79.3,disp:.9},dTm1:{lo:-.3,hi:.3,disp:.5},tmA2:{lo:90.5,hi:92.9,disp:1.1},tmB2:{lo:90.3,hi:92.7,disp:1.1},dTm2:{lo:-.35,hi:.25,disp:.5}},
+  "2025":{key:"2025",label:"2025/2026 · lot 78724220",cq:{lo:21.2,hi:23.2,disp:.5},tmp:{lo:61.6,hi:64,disp:.3},tmA1:{lo:76.9,hi:79.3,disp:.9},tmB1:{lo:76.9,hi:79.3,disp:.9},dTm1:{lo:-.3,hi:.3,disp:.5},tmA2:{lo:90.4,hi:92.8,disp:1.1},tmB2:{lo:90.2,hi:92.6,disp:1.1},dTm2:{lo:-.35,hi:.25,disp:.5}}
+};
+function parseSerial(name){const d=(name.match(/\d/g)||[]).join("");return d.length>=5?d.slice(-5):(d||"?");}
+const MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function parseDate(name,text){
+  let m=text.match(/name="(?:RunStartTime|StartTime|ExpCreateDate|Created)"[^>]*>(\d{4})-(\d{2})-(\d{2})/);
+  if(m)return new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));
+  m=name.match(/(\d{1,2})-([A-Za-z]{3})-(\d{4})/);
+  if(m&&MON[m[2].toLowerCase()]!==undefined)return new Date(Date.UTC(+m[3],MON[m[2].toLowerCase()],+m[1]));
+  m=name.match(/(20\d{2})[.\-_]?(\d{2})[.\-_]?(\d{2})/);
+  if(m){const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));if(!isNaN(d))return d;}
+  return null;
+}
+function meta(text){
+  const g=(names)=>{const m=text.match(new RegExp(`name="(?:${names})"[^>]*>([^<]+)<`));return m?m[1].trim():"";};
+  const notes=g("Notes");let lot=g("LotNumber|ReagentLot|KitLot");
+  if(!lot&&/^\d{8,}/.test(notes))lot=notes.slice(0,8);
+  return {
+    instrName:g("InstrumentName|MachineName|DeviceName")||"LC 480",
+    instrumentId:g("InstrumentID|InstrumentId|DeviceID"),
+    sw:g("SoftwareVersion|ApplicationVersion|SWVersion|Version").replace(/^LCS480\s*/i,""),
+    lot,notes
+  };
+}
+function parseMeltMeta(text){return [...text.matchAll(/<obj name="Item" class="TSmoothInput"[\s\S]*?<prop name="ProgNo">(\d+)<\/prop>[\s\S]*?<obj name="Numerator" class="HTCChannel"[\s\S]*?<prop name="name">([^<]+)<\/prop>/g)]
+  .map((m,set)=>({set,progNo:+m[1],channel:m[2].trim()}));}
+function extractCrossingPoints(text){
+  const cp={};
+  for(const m of text.matchAll(/<obj name="item" class="QuantSampleB"[\s\S]*?<\/obj>/g)){
+    const p=m[0].match(/name="Pos">(\d+)<\/prop>/),v=m[0].match(/name="CrossingPoint">([+\-\d.Ee]+)<\/prop>/);
+    if(p&&v){const pos=+p[1],x=+v[1];if(PCR_SET.has(pos)&&x>5&&x<40)cp[pos]=x;}
+  }
+  if(!Object.keys(cp).length){const re=/name="Pos">(\d+)<\/prop>[\s\S]{0,500}?name="CrossingPoint">([+\-\d.Ee]+)<\/prop>/g;let m;
+    while((m=re.exec(text))){const pos=+m[1],x=+m[2];if(PCR_SET.has(pos)&&x>5&&x<40)cp[pos]=x;}}
+  return cp;
+}
+async function decodeIxo(file){
+  const buf=await file.arrayBuffer();const bytes=new Uint8Array(buf);
+  const text=new TextDecoder("iso-8859-1").decode(bytes);
+  const sha=await sha256hex(buf);
+  const md=meta(text);
+  const serial=md.instrumentId||parseSerial(file.name);
+  const date=parseDate(file.name,text);
+  const cp=extractCrossingPoints(text),cqArr=PCR_WELLS.map(w=>cp[w]).filter(Number.isFinite);
+  const amp=await decodeAcq(text);
+  const ampWell={};
+  for(const ch in amp){ampWell[ch]={};const cyc=Object.keys(amp[ch]).map(Number).sort((a,b)=>a-b);
+    const nW=amp[ch][cyc[0]].length;
+    for(let w=0;w<nW;w++){ampWell[ch][w]=cyc.map(c=>amp[ch][c][w]);}
+    ampWell[ch].__cycles=cyc;}
+  const temps=[...text.matchAll(/name="MeltTemp"[^>]*>([A-Za-z0-9+/=\s]+?)<\/prop>/g)].map(x=>darzArrays(b64ToBytes(x[1]))[0]);
+  const curves=[...text.matchAll(/name="MeltCurve"[^>]*>([A-Za-z0-9+/=\s]+?)<\/prop>/g)].map(x=>darzArrays(b64ToBytes(x[1])));
+  const diffs=[...text.matchAll(/name="DiffMeltCurve"[^>]*>([A-Za-z0-9+/=\s]+?)<\/prop>/g)].map(x=>darzArrays(b64ToBytes(x[1])));
+  const meltMeta=parseMeltMeta(text);
+  const need=[[0,"465-510"],[2,"465-510"],[2,"498-640"]];
+  if(!Object.keys(ampWell).length||temps.length<4||curves.length<4||need.some(([p,c])=>!meltMeta.some(x=>x.progNo===p&&x.channel===c)))throw new Error(t("invalidRun"));
+  const metrics=computeWellMetrics(ampWell,temps,curves,cp,meltMeta);
+  return {name:file.name,serial,date,sha,md,cp,cqArr,ampWell,temps,curves,diffs,meltMeta,metrics};
+}
+async function decodeAcq(text){
+  const m=text.match(/name="AcquisitionStore"[^>]*>([^<]+)</);if(!m)return {};
+  const inner=new TextDecoder("iso-8859-1").decode(await inflate(b64ToBytes(m[1].trim())));
+  const ch={};let cc=null,ca=null;
+  const re=/name="Cycle">(\d+)<\/prop>|name="Channel">(\d+)<\/prop>|name="FloPoints">([^<]+)</g;let mm;
+  while((mm=re.exec(inner))){
+    if(mm[1]!==undefined)cc=parseInt(mm[1])+1;
+    else if(mm[2]!==undefined)ca=parseInt(mm[2]);
+    else{const b=b64ToBytes(mm[3]);const dv=new DataView(b.buffer,b.byteOffset,b.byteLength);const a=new Float32Array(b.byteLength/4);for(let i=0;i<a.length;i++)a[i]=dv.getFloat32(i*4,true);(ch[ca]??={})[cc]=a;}
+  }
+  return ch;
+}
+function stats(a){const n=a.length;if(!n)return{n:0,mean:NaN,sd:NaN,min:NaN,max:NaN,range:NaN};
+  const mean=a.reduce((x,y)=>x+y,0)/n;const sd=n>1?Math.sqrt(a.reduce((x,y)=>x+(y-mean)**2,0)/(n-1)):0;
+  return{n,mean,sd,min:Math.min(...a),max:Math.max(...a),range:Math.max(...a)-Math.min(...a)};}
+function median(a){if(!a.length)return NaN;const b=[...a].sort((x,y)=>x-y);const h=b.length>>1;return b.length%2?b[h]:(b[h-1]+b[h])/2;}
+function tmWin(temp,d,lo,hi){let best=-Infinity,bi=-1;const n=Math.min(temp.length,d.length);
+  for(let i=0;i<n;i++){const tt=temp[i];if(tt<lo||tt>hi)continue;if(d[i]>best){best=d[i];bi=i;}}
+  if(bi<0)return null;if(bi<=0||bi>=n-1)return temp[bi];
+  const y0=d[bi-1],y1=d[bi],y2=d[bi+1],den=y0-2*y1+y2;const off=den!==0?0.5*(y0-y2)/den:0;
+  return temp[bi]+off*(temp[bi+1]-temp[bi]);}
+// smoothed negative first derivative of a raw melt curve (for melting-mix wells, whose stored DiffMeltCurve is empty)
+function negDeriv(T,F,radius=0){const n=Math.min(T.length,F.length);const S=new Float64Array(n);
+  for(let i=0;i<n;i++){let s=0,c=0;for(let k=-radius;k<=radius;k++){const j=i+k;if(j>=0&&j<n){s+=F[j];c++;}}S[i]=s/c;}
+  const d=new Float64Array(n);for(let i=1;i<n-1;i++){const dt=T[i+1]-T[i-1];d[i]=dt?-(S[i+1]-S[i-1])/dt:0;}return d;}
+function peakInWin(T,d,lo,hi){let best=-Infinity,bi=-1;const n=Math.min(T.length,d.length);
+  for(let i=1;i<n-1;i++){if(T[i]<lo||T[i]>hi)continue;if(d[i]>d[i-1]&&d[i]>=d[i+1]&&d[i]>best){best=d[i];bi=i;}}
+  if(bi<1||bi>=n-1)return bi>=0?T[bi]:null;
+  const y0=d[bi-1],y1=d[bi],y2=d[bi+1],den=y0-2*y1+y2;const off=den?Math.max(-1,Math.min(1,.5*(y0-y2)/den)):0;return T[bi]+off*(T[bi+1]-T[bi]);}
+// max −dF/dT height within a window (used to locate the 465-510 melting channel and the melting-mix wells)
+function peakHeight(T,F,lo,hi){const d=negDeriv(T,F);const n=Math.min(T.length,d.length);let mx=0;
+  for(let i=1;i<n-1;i++){if(T[i]<lo||T[i]>hi)continue;if(d[i]>mx)mx=d[i];}return mx;}
+// Per-well QC metric maps matching the LightCycler 480 report (validated against the signed report):
+//  crossing point (498-640, PCR-mix wells); 510 background (cyc 2-6) & 640 signal dynamics (raw amplification);
+//  melting mix (465-510, HybProbe): two peaks TmA≈78.2°C / TmB≈91.5°C on the sparse melting-mix wells,
+//  for Melting A (72-97°C) and Melting B (50-97°C) programs.
+function computeWellMetrics(ampWell,temps,curves,cp,meltMeta){
+  const chans=Object.keys(ampWell);
+  const baseC=(ch,w)=>{const y=ampWell[ch]&&ampWell[ch][w];if(!y)return NaN;return (y[1]+y[2]+y[3]+y[4]+y[5])/5;};
+  const ampC=(ch,w)=>{const y=ampWell[ch]&&ampWell[ch][w];if(!y)return NaN;let mx=-Infinity;for(const v of y)if(v>mx)mx=v;return mx-((y[1]+y[2]+y[3]+y[4]+y[5])/5);};
+  let chanHi=chans[0],medHi=-Infinity;
+  chans.forEach(ch=>{const arr=[];for(let w=0;w<96;w++){const a=ampC(ch,w);if(isFinite(a))arr.push(a);}const m=median(arr);if(m>medHi){medHi=m;chanHi=ch;}});
+  const chanLo=chans.find(c=>c!==chanHi)||chanHi;
+  const bg510={},dyn640={};
+  for(let w=0;w<96;w++){const b=baseC(chanLo,w);if(isFinite(b))bg510[w]=b;const a=ampC(chanHi,w);if(isFinite(a))dyn640[w]=a;}
+  const findSet=(progNo,channel)=>{const x=meltMeta.find(m=>m.progNo===progNo&&m.channel===channel);return x?x.set:-1;};
+  const setA=findSet(0,"465-510"),setB=findSet(2,"465-510"),setPcr=findSet(2,"498-640");
+  function twoPeaks(setIdx,wells){const low={},high={};if(setIdx<0)return{low,high};const T=temps[setIdx],C=curves[setIdx];
+    for(const w of wells){const F=C&&C[w];if(!F)continue;const d=negDeriv(T,F,0);const a=peakInWin(T,d,74,84),b=peakInWin(T,d,86,95);
+      if(a!=null&&isFinite(a))low[w]=a;if(b!=null&&isFinite(b))high[w]=b;}return{low,high};}
+  const A=twoPeaks(setA,MELT_WELLS),B=twoPeaks(setB,MELT_WELLS),tmp={};
+  if(setPcr>=0){const T=temps[setPcr],C=curves[setPcr];for(const w of PCR_WELLS){const F=C&&C[w];if(!F)continue;const x=peakInWin(T,negDeriv(T,F,0),60,65);if(x!=null&&isFinite(x))tmp[w]=x;}}
+  const dTm1={},dTm2={};for(const w of MELT_WELLS){if(isFinite(A.low[w])&&isFinite(B.low[w]))dTm1[w]=B.low[w]-A.low[w];if(isFinite(A.high[w])&&isFinite(B.high[w]))dTm2[w]=B.high[w]-A.high[w];}
+  return {chanHi,chanLo,bg510,dyn640,mmWells:[...MELT_WELLS],setA,setB,setPcr,tmp,tmA1:A.low,tmB1:B.low,dTm1,tmA2:A.high,tmB2:B.high,dTm2};
+}
+function valuesFor(map,wells){return wells.map(w=>map&&map[w]).filter(Number.isFinite);}
+function metricStats(map,wells){const s=stats(valuesFor(map,wells));s.median=median(valuesFor(map,wells));return s;}
+function profileForRun(run){const mode=document.getElementById("profileMode").value;if(mode!=="auto")return LIMIT_PROFILES[mode]||null;
+  const byLot={"26324420":"2017","57252820":"2023","78724220":"2025"},lotKey=byLot[run.md.lot];if(lotKey)return LIMIT_PROFILES[lotKey];
+  const y=run.date?run.date.getUTCFullYear():0;if(y===2017)return LIMIT_PROFILES["2017"];if(y===2023)return LIMIT_PROFILES["2023"];if(y===2025||y===2026)return LIMIT_PROFILES["2025"];return null;}
+function meanCheck(s,l){return s.n>0&&s.mean>=l.lo&&s.mean<=l.hi&&s.sd<=l.disp;}
+function medianCheck(s,l){return s.n>0&&s.median>=l.lo&&s.median<=l.hi&&s.range<=l.disp;}
+let RUNS=[];let SEL=-1;
+function computeRun(run){
+  const M=run.metrics||{},p=profileForRun(run),cq=stats(valuesFor(run.cp,PCR_WELLS)),tmp=metricStats(M.tmp,PCR_WELLS);
+  const melt={};for(const k of ["tmA1","tmB1","dTm1","tmA2","tmB2","dTm2"])melt[k]=metricStats(M[k],MELT_WELLS);
+  const pcrExcluded=PCR_WELLS.filter(w=>!isFinite(run.cp[w])||!isFinite(M.tmp[w])).length;
+  const meltExcluded=MELT_WELLS.filter(w=>["tmA1","tmB1","dTm1","tmA2","tmB2","dTm2"].some(k=>!isFinite(M[k][w]))).length;
+  const checks=p?{cq:meanCheck(cq,p.cq),tmp:meanCheck(tmp,p.tmp),tmA1:medianCheck(melt.tmA1,p.tmA1),tmB1:medianCheck(melt.tmB1,p.tmB1),dTm1:medianCheck(melt.dTm1,p.dTm1),tmA2:medianCheck(melt.tmA2,p.tmA2),tmB2:medianCheck(melt.tmB2,p.tmB2),dTm2:medianCheck(melt.dTm2,p.dTm2),excluded:pcrExcluded<=2&&meltExcluded<=1&&(pcrExcluded+meltExcluded)<=3}:{};
+  run._profile=p;run._cq=cq;run._tmp={set:M.setPcr,map:M.tmp,...tmp};run._tmm={set:M.setA,map:M.tmA1,...melt.tmA1};run._tmpMed=tmp.mean;run._tmmMed=melt.tmA1.median;run._meltStats=melt;
+  run._excluded={pcr:pcrExcluded,melt:meltExcluded,total:pcrExcluded+meltExcluded};run._pass=checks;run._overall=p?Object.values(checks).every(Boolean):null;
+}
+function pill(ok){return `<span class="pill ${ok==null?'na':(ok?'ok':'bad')}">${ok==null?t('review'):(ok?t('pass'):t('fail'))}</span>`;}
+function fmt(x,d=2){return isNaN(x)||x==null?"—":(+x).toFixed(d);}
+function fdate(d){return d?d.toISOString().slice(0,10):"—";}
+const PALETTE=["#4ea1ff","#ff8c42","#37c281","#c77dff","#ffc857","#5fd0d6","#ff6b9d"];
+function serialColor(serial){const ss=[...new Set(RUNS.map(r=>r.serial))];return PALETTE[ss.indexOf(serial)%PALETTE.length];}
+function renderChecks(r){const tb=document.getElementById("checksBody");tb.innerHTML="";if(!r||!r._profile)return;
+  const p=r._profile,s=r._meltStats,c=r._pass;
+  const rows=[[t('l_cq'),`mean ${fmt(r._cq.mean,3)} · SD ${fmt(r._cq.sd,3)}`,`${p.cq.lo}–${p.cq.hi} · SD ≤ ${p.cq.disp}`,c.cq],
+    [t('l_tmp'),`mean ${fmt(r._tmp.mean,3)} · SD ${fmt(r._tmp.sd,3)}`,`${p.tmp.lo}–${p.tmp.hi} °C · SD ≤ ${p.tmp.disp}`,c.tmp]];
+  for(const k of ["tmA1","tmB1","dTm1","tmA2","tmB2","dTm2"]){const key=k[0]==="d"?`pm_${k.toLowerCase()}`:`pm_${k.toLowerCase()}`;rows.push([t(key),`median ${fmt(s[k].median,3)} · range ${fmt(s[k].range,3)}`,`${p[k].lo}–${p[k].hi} °C · range ≤ ${p[k].disp}`,c[k]]);}
+  rows.push([t('excludedLabel'),`${r._excluded.pcr} PCR · ${r._excluded.melt} melt · ${r._excluded.total} total`,`≤2 PCR · ≤1 melt · ≤3 total`,c.excluded]);
+  for(const row of rows){const tr=document.createElement("tr");tr.innerHTML=`<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${pill(row[3])}</td>`;tb.appendChild(tr);}
+}
+
+function render(){
+  if(!RUNS.length){["runsCard","limitsCard","trendCard","plateCard","curveCard","dlCard"].forEach(id=>document.getElementById(id).classList.add("hidden"));renderMetadata();return;}
+  RUNS.forEach(computeRun);
+  ["runsCard","limitsCard","trendCard","dlCard"].forEach(id=>document.getElementById(id).classList.remove("hidden"));
+  const mode=document.getElementById("profileMode").value,selected=RUNS[SEL>=0?SEL:0],p=selected&&selected._profile;
+  document.getElementById("profileSummary").textContent=mode==="auto"?`${t('profileAuto')} · ${p?p.label:t('review')} · Cq ${p?p.cq.lo+"–"+p.cq.hi:"—"}; Tm PCR ${p?p.tmp.lo+"–"+p.tmp.hi:"—"} °C`:p?`${p.label} · Cq ${p.cq.lo}–${p.cq.hi}; Tm PCR ${p.tmp.lo}–${p.tmp.hi} °C`:t('review');
+  renderChecks(selected);
+  const tb=document.getElementById("runsBody");tb.innerHTML="";
+  RUNS.forEach((r,i)=>{
+    const tr=document.createElement("tr");tr.className="runrow";if(i===SEL)tr.style.background="rgba(78,161,255,.08)";
+    tr.innerHTML=`<td>${escHTML(r.name)}</td><td><span class="sw" style="background:${serialColor(r.serial)}"></span> ${escHTML(r.md.instrName)} · ${escHTML(r.serial)}</td>
+      <td>${fdate(r.date)}</td><td class="num">${r._cq.n}</td>
+      <td class="num">${fmt(r._cq.mean,3)}</td><td class="num">${fmt(r._cq.sd,3)}</td>
+      <td>${r._profile?r._profile.label:t('review')}</td><td class="num">${fmt(r._tmpMed,3)}</td><td class="num">${fmt(r._tmmMed,3)}</td>
+      <td>${pill(r._overall)}</td><td class="mut" style="font-size:11px">${r.sha.slice(0,12)}…</td>`;
+    tr.onclick=()=>{SEL=i;render();};
+    tb.appendChild(tr);
+  });
+  drawTrends();
+  if(SEL<0||SEL>=RUNS.length)SEL=0;
+  renderDetail();
+  renderMetadata();
+}
+function renderDetail(){
+  const r=RUNS[SEL];if(!r)return;
+  document.getElementById("plateCard").classList.remove("hidden");
+  document.getElementById("curveCard").classList.remove("hidden");
+  document.getElementById("plateTitle").textContent=`${r.name} · ${r.md.instrName} ${r.serial} · ${fdate(r.date)}`;
+  document.getElementById("curveTitle").textContent=`${r.name}`;
+  drawPlate(r);
+  const sel=document.getElementById("wellSel");const cur=sel.value;
+  sel.innerHTML="";const wells=Array.from({length:96},(_,w)=>w);
+  wells.forEach(w=>{const o=document.createElement("option"),role=PCR_SET.has(w)?t('rolePcr'):(MELT_SET.has(w)?t('roleMelt'):t('roleBlank'));o.value=w;o.textContent=`${wellName(w)} · ${role} (${t('pos')} ${w})`;sel.appendChild(o);});
+  if(wells.length){sel.value=wells.includes(+cur)?cur:wells[0];drawCurves(r,+sel.value);}
+  sel.onchange=()=>drawCurves(r,+sel.value);
+}
+function wellName(pos){const row="ABCDEFGH"[Math.floor(pos/12)];const col=(pos%12)+1;return row+col;}
+function heat(v,lo,hi){if(v==null||isNaN(v))return "#1d2637";if(!(hi>lo)){lo-=1;hi+=1;}let x=(v-lo)/(hi-lo);x=Math.max(0,Math.min(1,x));
+  const c1=[46,120,200],c2=[255,200,60],c3=[255,93,80];let r,g,b;
+  if(x<0.5){const k=x*2;r=c1[0]+(c2[0]-c1[0])*k;g=c1[1]+(c2[1]-c1[1])*k;b=c1[2]+(c2[2]-c1[2])*k;}
+  else{const k=(x-0.5)*2;r=c2[0]+(c3[0]-c2[0])*k;g=c2[1]+(c3[1]-c2[1])*k;b=c2[2]+(c3[2]-c2[2])*k;}
+  return `rgb(${r|0},${g|0},${b|0})`;}
+function pctRange(map){const vs=Object.values(map).filter(v=>v!=null&&!isNaN(v)).sort((a,b)=>a-b);
+  if(!vs.length)return[0,1];let lo=vs[Math.floor(vs.length*0.05)],hi=vs[Math.ceil(vs.length*0.95)-1];
+  if(lo===hi){lo-=Math.abs(lo)*0.02||1;hi+=Math.abs(hi)*0.02||1;}return[lo,hi];}
+function drawPlate(r){
+  const metric=document.getElementById("plateMetric").value,p=r._profile,M=r.metrics||{};
+  let map,lo=null,hi=null,unit,dec=1;
+  if(metric==="cq"){map=r.cp;if(p){lo=p.cq.lo-.5;hi=p.cq.hi+.5;}unit="Cq";dec=1;}
+  else if(metric==="tmp"){map=r._tmp.map;if(p){lo=p.tmp.lo;hi=p.tmp.hi;}unit="°C";dec=1;}
+  else if(metric==="bg510"){map=M.bg510||{};unit="rfu";dec=0;}
+  else if(metric==="dyn640"){map=M.dyn640||{};unit="rfu";dec=0;}
+  else if(metric==="tmA1"){map=M.tmA1||{};if(p){lo=p.tmA1.lo;hi=p.tmA1.hi;}unit="°C";dec=2;}
+  else if(metric==="tmB1"){map=M.tmB1||{};if(p){lo=p.tmB1.lo;hi=p.tmB1.hi;}unit="°C";dec=2;}
+  else if(metric==="dtm1"){map=M.dTm1||{};if(p){lo=p.dTm1.lo;hi=p.dTm1.hi;}unit="°C";dec=2;}
+  else if(metric==="tmA2"){map=M.tmA2||{};if(p){lo=p.tmA2.lo;hi=p.tmA2.hi;}unit="°C";dec=2;}
+  else if(metric==="tmB2"){map=M.tmB2||{};if(p){lo=p.tmB2.lo;hi=p.tmB2.hi;}unit="°C";dec=2;}
+  else{map=M.dTm2||{};if(p){lo=p.dTm2.lo;hi=p.dTm2.hi;}unit="°C";dec=2;}
+  if(lo==null){const pr=pctRange(map);lo=pr[0];hi=pr[1];}
+  const el=document.getElementById("plate");el.innerHTML="";
+  const corner=document.createElement("div");corner.className="cell hdr";el.appendChild(corner);
+  for(let c=1;c<=12;c++){const h=document.createElement("div");h.className="cell hdr";h.textContent=c;el.appendChild(h);}
+  for(let row=0;row<8;row++){
+    const rh=document.createElement("div");rh.className="cell hdr";rh.textContent="ABCDEFGH"[row];el.appendChild(rh);
+    for(let col=0;col<12;col++){const pos=row*12+col;const v=map[pos];
+      const cell=document.createElement("div");cell.className="cell";cell.style.background=heat(v,lo,hi);
+      cell.textContent=v!=null&&!isNaN(v)?(dec===0?Math.round(v):v.toFixed(dec)):"";
+      cell.style.fontSize=(dec===0)?"9px":"10px";
+      cell.title=`${wellName(pos)} · ${v!=null&&!isNaN(v)?(dec===0?Math.round(v):v.toFixed(3))+" "+unit:t('na')}`;el.appendChild(cell);}
+  }
+  const f=x=>dec===0?Math.round(x):x.toFixed(dec);
+  document.getElementById("plateLegend").innerHTML=`<span><span class="sw" style="background:${heat(lo,lo,hi)}"></span>${f(lo)}</span><span><span class="sw" style="background:${heat((lo+hi)/2,lo,hi)}"></span>${f((lo+hi)/2)}</span><span><span class="sw" style="background:${heat(hi,lo,hi)}"></span>${f(hi)} ${unit}</span>`;
+}
+document.getElementById("plateMetric").onchange=()=>{if(RUNS[SEL])drawPlate(RUNS[SEL]);};
+function axes(ctx,W,H,pad){ctx.clearRect(0,0,W,H);ctx.strokeStyle="#2a3550";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,8);ctx.lineTo(pad,H-pad);ctx.lineTo(W-8,H-pad);ctx.stroke();}
+function drawCurves(r,pos){
+  const role=PCR_SET.has(pos)?t('rolePcr'):(MELT_SET.has(pos)?t('roleMelt'):t('roleBlank'));
+  document.getElementById("wellInfo").textContent=`${wellName(pos)} · ${role}${isFinite(r.cp[pos])?" · Cq "+fmt(r.cp[pos],3):""}`;
+  const ch=r.metrics.chanHi;
+  const A=document.getElementById("ampCanvas");const ac=A.getContext("2d");const W=A.width,H=A.height,pad=38;
+  axes(ac,W,H,pad);
+  if(ch!==undefined&&r.ampWell[ch][pos]){const y=r.ampWell[ch][pos];const cyc=r.ampWell[ch].__cycles;
+    const ymin=Math.min(...y),ymax=Math.max(...y);const xmin=cyc[0],xmax=cyc[cyc.length-1];
+    ac.strokeStyle="#4ea1ff";ac.lineWidth=2;ac.beginPath();
+    y.forEach((v,i)=>{const px=pad+(cyc[i]-xmin)/(xmax-xmin)*(W-pad-12);const py=H-pad-(v-ymin)/(ymax-ymin||1)*(H-pad-14);i?ac.lineTo(px,py):ac.moveTo(px,py);});ac.stroke();
+    ac.fillStyle="#93a1b8";ac.font="11px sans-serif";ac.fillText(t('cyc'),W/2-14,H-8);ac.fillText(xmin+"",pad-4,H-pad+14);ac.fillText(xmax+"",W-24,H-pad+14);}
+  const setIdx=MELT_SET.has(pos)?r.metrics.setA:r.metrics.setPcr;
+  const M=document.getElementById("meltCanvas");const mc=M.getContext("2d");axes(mc,W,H,pad);
+  const T=r.temps[setIdx],C=r.curves[setIdx];
+  if(T&&C&&C[pos]){const d=negDeriv(T,C[pos],0);const n=Math.min(T.length,d.length);
+    const xs=[],ys=[];for(let i=0;i<n;i++){xs.push(T[i]);ys.push(d[i]);}
+    const ymin=Math.min(...ys),ymax=Math.max(...ys),xmin=Math.min(...xs),xmax=Math.max(...xs);
+    mc.strokeStyle="#37c281";mc.lineWidth=2;mc.beginPath();
+    for(let i=0;i<n;i++){const px=pad+(xs[i]-xmin)/(xmax-xmin)*(W-pad-12);const py=H-pad-(ys[i]-ymin)/(ymax-ymin||1)*(H-pad-14);i?mc.lineTo(px,py):mc.moveTo(px,py);}mc.stroke();
+    [[[60,65],"#ff8c42"],[[74,84],"#c77dff"],[[86,95],"#c77dff"]].forEach(pair=>{const win=pair[0],col=pair[1];
+      [win[0],win[1]].forEach(wv=>{if(wv<xmin||wv>xmax)return;const px=pad+(wv-xmin)/(xmax-xmin)*(W-pad-12);mc.strokeStyle=col;mc.globalAlpha=.5;mc.beginPath();mc.moveTo(px,8);mc.lineTo(px,H-pad);mc.stroke();mc.globalAlpha=1;});});
+    mc.fillStyle="#93a1b8";mc.font="11px sans-serif";mc.fillText(t('temp')+" (°C)",W/2-24,H-8);mc.fillText(xmin.toFixed(0),pad-4,H-pad+14);mc.fillText(xmax.toFixed(0),W-24,H-pad+14);}
+}
+// Draw one instrument's trend into a canvas. subset = runs for that serial (sorted by date).
+// valFn -> y value; opt.err -> ± error bar; opt.scatter -> array of per-well y; opt.unit,opt.dec labels.
+function drawPanel(cv,subset,valFn,band,col,opt){
+  opt=opt||{};const ctx=cv.getContext("2d");const W=cv.width,H=cv.height,pad=46;
+  axes(ctx,W,H,pad);
+  const pts=subset.map(r=>({x:r.date?r.date.getTime():0,y:valFn(r),r})).filter(p=>p.y!=null&&!isNaN(p.y)&&p.x).sort((a,b)=>a.x-b.x);
+  if(!pts.length){ctx.fillStyle="#93a1b8";ctx.font="12px sans-serif";ctx.fillText(t('noruns'),pad+8,H/2);return;}
+  const ys=[];pts.forEach(p=>{ys.push(p.y);if(opt.err){const e=opt.err(p.r);if(!isNaN(e)){ys.push(p.y-e);ys.push(p.y+e);}}if(opt.scatter)opt.scatter(p.r).forEach(v=>ys.push(v));});
+  const bands=band?pts.map(p=>typeof band==="function"?band(p.r):band):[];
+  let ymin=Math.min(...ys),ymax=Math.max(...ys);
+  bands.filter(Boolean).forEach(b=>{ymin=Math.min(ymin,b[0]);ymax=Math.max(ymax,b[1]);});
+  const yr=(ymax-ymin)||1;ymin-=yr*0.14;ymax+=yr*0.14;
+  const xmin=pts[0].x,xmax=pts[pts.length-1].x;const xr=(xmax-xmin)||1;const plotW=W-pad-16;
+  const X=x=>(xr===0)?pad+plotW*0.5:pad+0.10*plotW+(x-xmin)/xr*plotW*0.80;
+  const Y=y=>H-pad-(y-ymin)/(ymax-ymin)*(H-pad-18);
+  const dec=opt.dec==null?2:opt.dec;const unit=opt.unit||"";
+  if(bands.length){ctx.fillStyle="rgba(55,194,129,.10)";ctx.strokeStyle="rgba(55,194,129,.45)";ctx.setLineDash([4,4]);
+    pts.forEach((p,i)=>{const b=bands[i];if(!b)return;const px=X(p.x),left=i?((X(pts[i-1].x)+px)/2):pad,right=i<pts.length-1?((px+X(pts[i+1].x))/2):W-14;
+      ctx.fillRect(left,Y(b[1]),right-left,Y(b[0])-Y(b[1]));[b[0],b[1]].forEach(v=>{ctx.beginPath();ctx.moveTo(left,Y(v));ctx.lineTo(right,Y(v));ctx.stroke();});});ctx.setLineDash([]);}
+  // per-well scatter (block uniformity)
+  if(opt.scatter){ctx.fillStyle=col;ctx.globalAlpha=.22;pts.forEach(p=>{const vs=opt.scatter(p.r);vs.forEach((v,i)=>{const jit=((((i+1)*0.61803398875)%1)-.5)*14;ctx.beginPath();ctx.arc(X(p.x)+jit,Y(v),2.2,0,7);ctx.fill();});});ctx.globalAlpha=1;}
+  // connecting line + error bars + markers
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();pts.forEach((p,i)=>{i?ctx.lineTo(X(p.x),Y(p.y)):ctx.moveTo(X(p.x),Y(p.y));});ctx.stroke();
+  pts.forEach(p=>{const px=X(p.x),py=Y(p.y);
+    if(opt.err){const e=opt.err(p.r);if(!isNaN(e)&&e>0){ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px,Y(p.y-e));ctx.lineTo(px,Y(p.y+e));ctx.stroke();
+      [Y(p.y-e),Y(p.y+e)].forEach(yy=>{ctx.beginPath();ctx.moveTo(px-4,yy);ctx.lineTo(px+4,yy);ctx.stroke();});}}
+    ctx.fillStyle="#161d2b";ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.arc(px,py,5,0,7);ctx.fill();ctx.stroke();
+    // value label
+    ctx.fillStyle="#e8edf6";ctx.font="11px sans-serif";ctx.textAlign="center";ctx.fillText(p.y.toFixed(dec)+unit,px,py-11);
+    if(opt.err){const e=opt.err(p.r);if(!isNaN(e))ctx.fillText("SD "+e.toFixed(dec),px,py-24);}
+    // date label
+    ctx.fillStyle="#93a1b8";ctx.fillText(new Date(p.x).toISOString().slice(0,7),px,H-pad+16);
+    ctx.textAlign="left";});
+  ctx.fillStyle="#93a1b8";ctx.font="11px sans-serif";
+  ctx.fillText(ymax.toFixed(dec),4,Y(ymax)+10);ctx.fillText(ymin.toFixed(dec),4,Y(ymin)-2);
+}
+function drawTrends(){
+  const cont=document.getElementById("trendContainer");cont.innerHTML="";
+  const serials=[...new Set(RUNS.map(r=>r.serial))]
+    .sort((a,b)=>{const fa=RUNS.filter(r=>r.serial===a).map(r=>r.date?r.date.getTime():0).sort()[0];
+      const fb=RUNS.filter(r=>r.serial===b).map(r=>r.date?r.date.getTime():0).sort()[0];return fa-fb;});
+  serials.forEach(s=>{
+    const subset=RUNS.filter(r=>r.serial===s).sort((a,b)=>(a.date?a.date.getTime():0)-(b.date?b.date.getTime():0));
+    const model=subset[0].md.instrName||"LC 480";const col=serialColor(s);
+    const block=document.createElement("div");block.style.margin="6px 0 18px";
+    block.innerHTML=`<div style="font-weight:650;font-size:13.5px;color:${col};margin-bottom:8px;border-left:3px solid ${col};padding-left:8px">${t('c_instr')} ${escHTML(s)} · ${escHTML(model)}</div>
+      <div class="grid2">
+        <div><div class="mut" style="font-size:12px;margin-bottom:4px">${t('p_cq')}</div><canvas width="560" height="240"></canvas></div>
+        <div><div class="mut" style="font-size:12px;margin-bottom:4px">${t('p_tm')}</div><canvas width="560" height="240"></canvas></div>
+      </div>`;
+    cont.appendChild(block);
+    const cvs=block.querySelectorAll("canvas");
+    drawPanel(cvs[0],subset,r=>r._cq.mean,r=>r._profile?[r._profile.cq.lo,r._profile.cq.hi]:null,col,{err:r=>r._cq.sd,scatter:r=>valuesFor(r.cp,PCR_WELLS),dec:3});
+    drawPanel(cvs[1],subset,r=>r._tmpMed,r=>r._profile?[r._profile.tmp.lo,r._profile.tmp.hi]:null,col,{unit:" °C",dec:3});
+  });
+  const ss=[...new Set(RUNS.map(r=>r.serial))];
+  document.getElementById("trendLegend").innerHTML=ss.map(s=>`<span><span class="sw" style="background:${serialColor(s)}"></span>${t('c_instr')} ${escHTML(s)}</span>`).join("")
+    +`<span><span class="sw" style="background:rgba(55,194,129,.35)"></span>${t('acceptRange')}</span>`;
+}
+function dl(name,text,type="text/csv"){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);}
+function csvCell(v){let s=v==null?"":String(v);if(typeof v==="string"&&/^[=+\-@]/.test(s))s="'"+s;return /[",\r\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;}
+function csvRow(a){return a.map(csvCell).join(",")+"\n";}
+function csvAmp(){let out="file,serial,run_date,channel,pos,well,cycle,fluorescence\n";
+  RUNS.forEach(r=>{for(const ch in r.ampWell){const cyc=r.ampWell[ch].__cycles;
+    Object.keys(r.ampWell[ch]).filter(k=>k!=="__cycles").forEach(pos=>{const y=r.ampWell[ch][pos];
+      y.forEach((v,i)=>{out+=csvRow([r.name,r.serial,fdate(r.date),ch,pos,wellName(+pos),cyc[i],v]);});});}});
+  return out;}
+function csvMelt(){let out="file,serial,run_date,melt_set,program,program_no,channel,pos,well,well_role,temperature,fluorescence,neg_dF_dT\n";
+  RUNS.forEach(r=>{const nSets=Math.min(r.temps.length,r.curves.length);
+    for(let s=0;s<nSets;s++){const T=r.temps[s],C=r.curves[s],meta=r.meltMeta.find(x=>x.set===s)||{};if(!T||!C)continue;
+      for(let pos=0;pos<C.length;pos++){if(!C[pos])continue;const d=negDeriv(T,C[pos],0),n=Math.min(T.length,C[pos].length),role=PCR_SET.has(pos)?"PCR_mix":(MELT_SET.has(pos)?"melting_mix":"blank");
+        for(let i=0;i<n;i++)out+=csvRow([r.name,r.serial,fdate(r.date),s,meta.progNo===0?"A":(meta.progNo===2?"B":""),meta.progNo,meta.channel,pos,wellName(pos),role,T[i].toFixed(3),C[pos][i],d[i]]);}}});
+  return out;}
+function csvMetrics(){let out="file,serial,run_date,pos,well,well_role,crossing_point,fluor510_bg_cyc2_6_raw,fluor640_dynamics_raw,tm_pcr_mix_640,meltA_TmA1,meltB_TmB1,dTm1_B1_minus_A1,meltA_TmA2,meltB_TmB2,dTm2_B2_minus_A2\n";
+  RUNS.forEach(r=>{const M=r.metrics||{};const mm=new Set(M.mmWells||[]);const v=(o,p,d=3)=>o&&o[p]!=null&&!isNaN(o[p])?o[p].toFixed(d):"";
+    for(let pos=0;pos<96;pos++){const isPcr=(pos in r.cp);const role=isPcr?"PCR_mix":(mm.has(pos)?"melting_mix":"empty");
+      out+=csvRow([r.name,r.serial,fdate(r.date),pos,wellName(pos),role,isPcr?r.cp[pos]:"",v(M.bg510,pos,1),v(M.dyn640,pos,1),v(M.tmp,pos),v(M.tmA1,pos),v(M.tmB1,pos),v(M.dTm1,pos),v(M.tmA2,pos),v(M.tmB2,pos),v(M.dTm2,pos)]);}});
+  return out;}
+function csvSummary(){let out="file,serial,instrument,run_date,software,lot,profile,cq_n,cq_mean,cq_sd,tm_pcr_n,tm_pcr_mean,tm_pcr_sd,tmA1_median,tmA1_range,tmB1_median,tmB1_range,dTm1_median,dTm1_range,tmA2_median,tmA2_range,tmB2_median,tmB2_range,dTm2_median,dTm2_range,pcr_excluded,melt_excluded,total_excluded,cq_pass,tm_pcr_pass,tmA1_pass,tmB1_pass,dTm1_pass,tmA2_pass,tmB2_pass,dTm2_pass,exclusions_pass,calculated_qc,sha256\n";
+  RUNS.forEach(r=>{const s=r._meltStats,c=r._pass;out+=csvRow([r.name,r.serial,r.md.instrName,fdate(r.date),r.md.sw,r.md.lot,r._profile&&r._profile.label,r._cq.n,fmt(r._cq.mean,3),fmt(r._cq.sd,3),r._tmp.n,fmt(r._tmp.mean,3),fmt(r._tmp.sd,3),fmt(s.tmA1.median,3),fmt(s.tmA1.range,3),fmt(s.tmB1.median,3),fmt(s.tmB1.range,3),fmt(s.dTm1.median,3),fmt(s.dTm1.range,3),fmt(s.tmA2.median,3),fmt(s.tmA2.range,3),fmt(s.tmB2.median,3),fmt(s.tmB2.range,3),fmt(s.dTm2.median,3),fmt(s.dTm2.range,3),r._excluded.pcr,r._excluded.melt,r._excluded.total,c.cq,c.tmp,c.tmA1,c.tmB1,c.dTm1,c.tmA2,c.tmB2,c.dTm2,c.excluded,r._overall,r.sha]);});
+  return out;}
+function manifest(){let out="file,sha256,kind,source_file,serial,run_date,software\n";
+  RUNS.forEach(r=>{out+=csvRow([r.name,r.sha,"unmodified source .ixo",r.name,r.serial,fdate(r.date),r.md.sw||""]);});
+  const generated=[["amplification_curves.csv",csvAmp()],["melting_curves.csv",csvMelt()],
+    ["per_well_metrics.csv",csvMetrics()],["qc_summary.csv",csvSummary()],
+    ["lightcycler480_instrument_qc_metadata.jsonld",machineMetadataJSON()]];
+  generated.forEach(([name,data])=>out+=csvRow([name,jsSha256(new TextEncoder().encode(data)),"generated export","all loaded runs","","",""]));
+  return out;}
+document.getElementById("dlAmp").onclick=()=>dl("amplification_curves.csv",csvAmp());
+document.getElementById("dlMelt").onclick=()=>dl("melting_curves.csv",csvMelt());
+document.getElementById("dlMetrics").onclick=()=>dl("per_well_metrics.csv",csvMetrics());
+document.getElementById("dlSummary").onclick=()=>dl("qc_summary.csv",csvSummary());
+document.getElementById("dlManifest").onclick=()=>dl("sha256_manifest.csv",manifest());
+document.getElementById("dlMetadata").onclick=()=>dl("lightcycler480_instrument_qc_metadata.jsonld",machineMetadataJSON(),"application/ld+json");
+const drop=document.getElementById("drop"),fileIn=document.getElementById("file");
+drop.onclick=()=>fileIn.click();
+drop.ondragover=e=>{e.preventDefault();drop.classList.add("over");};
+drop.ondragleave=()=>drop.classList.remove("over");
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");handle(e.dataTransfer.files);};
+fileIn.onchange=()=>handle(fileIn.files);
+document.getElementById("clearBtn").onclick=()=>{RUNS=[];SEL=-1;render();document.getElementById("loadState").textContent="";};
+document.getElementById("profileMode").onchange=()=>render();
+async function handle(files){
+  const arr=[...files].filter(f=>/\.ixo$/i.test(f.name));
+  const st=document.getElementById("loadState");let skipped=0;const errors=[];
+  for(let i=0;i<arr.length;i++){st.textContent=`${t('reading')} ${arr[i].name} (${i+1}/${arr.length})…`;
+    try{const run=await decodeIxo(arr[i]);if(RUNS.some(r=>r.sha===run.sha)){skipped++;continue;}RUNS.push(run);}catch(e){errors.push(`${arr[i].name}: ${e.message}`);}
+  }
+  RUNS.sort((a,b)=>(a.date?a.date.getTime():0)-(b.date?b.date.getTime():0));
+  st.textContent=`${RUNS.length} ${t('done')}${skipped?` · ${skipped} ${t('duplicate')}`:""}${errors.length?` · ${t('review')}: ${errors.join("; ")}`:""}`;
+  fileIn.value="";
+  render();
+}
+function jsSha256(bytes){
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const l=bytes.length;const withOne=new Uint8Array((((l+8)>>6)+1)*64);withOne.set(bytes);withOne[l]=0x80;
+  const bl=l*8;const dv=new DataView(withOne.buffer);dv.setUint32(withOne.length-4,bl>>>0,false);dv.setUint32(withOne.length-8,Math.floor(bl/0x100000000),false);
+  const w=new Uint32Array(64);const rot=(x,n)=>(x>>>n)|(x<<(32-n));
+  for(let i=0;i<withOne.length;i+=64){for(let j=0;j<16;j++)w[j]=dv.getUint32(i+j*4,false);
+    for(let j=16;j<64;j++){const s0=rot(w[j-15],7)^rot(w[j-15],18)^(w[j-15]>>>3);const s1=rot(w[j-2],17)^rot(w[j-2],19)^(w[j-2]>>>10);w[j]=(w[j-16]+s0+w[j-7]+s1)|0;}
+    let a=h[0],b=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+    for(let j=0;j<64;j++){const S1=rot(e,6)^rot(e,11)^rot(e,25);const chh=(e&f)^(~e&g);const t1=(hh+S1+chh+K[j]+w[j])|0;const S0=rot(a,2)^rot(a,13)^rot(a,22);const mj=(a&b)^(a&c)^(b&c);const t2=(S0+mj)|0;hh=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0;}
+    h=[(h[0]+a)|0,(h[1]+b)|0,(h[2]+c)|0,(h[3]+d)|0,(h[4]+e)|0,(h[5]+f)|0,(h[6]+g)|0,(h[7]+hh)|0];}
+  return h.map(x=>(x>>>0).toString(16).padStart(8,"0")).join("");
+}
+applyLang();
+</script>
+</body>
+</html>
